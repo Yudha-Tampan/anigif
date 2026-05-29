@@ -351,17 +351,22 @@ function downloadGif(gif) {
 }
 
 function copyLink(gif) {
-  const url = `${location.href.split('?')[0]}?gif=${encodeURIComponent(gif.video)}`;
-  navigator.clipboard.writeText(url)
-    .then(() => showToast('Link berhasil disalin! 🔗', 'success'))
-    .catch(() => {
-      // fallback
-      const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      ta.remove();
-      showToast('Link berhasil disalin! 🔗', 'success');
-    });
+  // Build direct URL to the GIF file — works as banner URL
+  const base = location.href.split('?')[0].replace(/\/[^/]*$/, '/');
+  const url  = `${base}${gif.video}`;
+
+  const write = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('Link GIF disalin! Langsung bisa dipasang sebagai banner 🔗', 'success'))
+      .catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy');
+        ta.remove();
+        showToast('Link GIF disalin! Langsung bisa dipasang sebagai banner 🔗', 'success');
+      });
+  };
+  write(url);
 }
 
 function shareGif(gif) {
