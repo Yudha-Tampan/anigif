@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AniGIF — Anime GIF Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated BG -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- Noise overlay -->
+  <div class="noise"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a class="nav-logo" href="#">
+        <span class="logo-icon"><i class="fa-solid fa-torii-gate"></i></span>
+        <span class="logo-text">Ani<span class="logo-accent">GIF</span></span>
+      </a>
+      <div class="nav-center">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="Cari judul atau anime..." autocomplete="off" />
+          <button class="search-clear" id="searchClear" aria-label="Clear search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="nav-right">
+        <span class="gif-count-badge" id="gifCountBadge">0 GIFs</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow"><i class="fa-solid fa-star"></i> Koleksi Terbaik</p>
+      <h1 class="hero-title">
+        Galeri Anime<br/>
+        <span class="hero-title-gradient">GIF Epik</span>
+      </h1>
+      <p class="hero-sub">Temukan, unduh & bagikan momen terbaik dari anime favoritmu</p>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </header>
+
+  <!-- FILTER CHIPS -->
+  <div class="filter-section" id="filterSection">
+    <div class="filter-container">
+      <div class="filter-chips" id="filterChips">
+        <button class="chip chip-active" data-filter="all">
+          <i class="fa-solid fa-border-all"></i> Semua
+        </button>
+        <!-- Dynamic chips injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <main class="gallery-section">
+    <div class="gallery-header">
+      <span class="results-text" id="resultsText">Memuat...</span>
+      <div class="view-toggle">
+        <button class="view-btn view-active" id="viewGrid" aria-label="Grid view">
+          <i class="fa-solid fa-grip"></i>
+        </button>
+        <button class="view-btn" id="viewList" aria-label="List view">
+          <i class="fa-solid fa-list"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="gallery-grid" id="galleryGrid">
+      <!-- Skeleton cards -->
+      <div class="card skeleton"></div>
+      <div class="card skeleton"></div>
+      <div class="card skeleton"></div>
+      <div class="card skeleton"></div>
+      <div class="card skeleton"></div>
+      <div class="card skeleton"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state hidden" id="emptyState">
+      <div class="empty-icon">
+        <i class="fa-solid fa-face-sad-tear"></i>
+      </div>
+      <h3 class="empty-title">GIF Tidak Ditemukan</h3>
+      <p class="empty-desc">Coba kata kunci lain atau filter yang berbeda</p>
+      <button class="btn-reset" id="btnReset">
+        <i class="fa-solid fa-rotate-left"></i> Reset Pencarian
+      </button>
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more-container" id="loadMoreContainer">
+      <button class="btn-load-more" id="btnLoadMore">
+        <span class="btn-text"><i class="fa-solid fa-chevron-down"></i> Muat Lebih Banyak</span>
+        <span class="btn-loading hidden"><i class="fa-solid fa-spinner fa-spin"></i> Memuat...</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="modal-body">
+        <div class="modal-gif-wrapper">
+          <img class="modal-gif" id="modalGif" src="" alt="" loading="lazy" />
+        </div>
+        <div class="modal-info">
+          <div class="modal-tags">
+            <span class="modal-tag"><i class="fa-solid fa-film"></i> <span id="modalAnime"></span></span>
+          </div>
+          <h2 class="modal-title" id="modalTitle"></h2>
+          <div class="modal-actions">
+            <button class="modal-btn btn-download" id="modalDownload">
+              <i class="fa-solid fa-download"></i> Unduh GIF
+            </button>
+            <button class="modal-btn btn-copy" id="modalCopy">
+              <i class="fa-solid fa-link"></i> Salin Link
+            </button>
+            <button class="modal-btn btn-share" id="modalShare">
+              <i class="fa-solid fa-share-nodes"></i> Bagikan
+            </button>
+          </div>
+          <div class="modal-nav">
+            <button class="modal-nav-btn" id="modalPrev">
+              <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+            </button>
+            <button class="modal-nav-btn" id="modalNext">
+              Berikutnya <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- SCROLL TO TOP -->
+  <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-logo">Ani<span>GIF</span></span>
+      <span class="footer-copy">Made with <i class="fa-solid fa-heart"></i> for anime lovers</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
