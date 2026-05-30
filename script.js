@@ -54,7 +54,6 @@ const DOM = {
   modalOverlay:  $('modalOverlay'),
   modal:         $('modal'),
   modalClose:    $('modalClose'),
-  modalGif:      $('modalGif'),
   modalTitle:    $('modalTitle'),
   modalAnime:    $('modalAnime'),
   modalDownload: $('modalDownload'),
@@ -211,16 +210,13 @@ function createCard(gif, index) {
 
   const gifSrc = gif.video;
   const placeholder = generatePlaceholder(gif);
+  const mediaEl = isVideo(gifSrc)
+    ? `<video class="card-gif card-video" data-src="${gifSrc}" src="" muted loop playsinline preload="none"></video>`
+    : `<img class="card-gif" data-src="${gifSrc}" src="${placeholder}" alt="${escHtml(gif.title)}" loading="lazy"/>`;
 
   card.innerHTML = `
     <div class="card-media">
-      <img
-        class="card-gif"
-        data-src="${gifSrc}"
-        src="${placeholder}"
-        alt="${escHtml(gif.title)}"
-        loading="lazy"
-      />
+      ${mediaEl}
       <div class="card-overlay">
         <div class="card-play-icon"><i class="fa-solid fa-expand"></i></div>
       </div>
@@ -275,6 +271,10 @@ function generatePlaceholder(gif) {
   return `data:image/svg+xml,${svg.replace(/\n\s*/g, '').replace(/#/g,'%23')}`;
 }
 
+function isVideo(src) {
+  return /\.mp4$/i.test(src);
+}
+
 function hashStr(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
@@ -290,18 +290,19 @@ function setupLazyLoad() {
   observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const img = entry.target;
-        const src = img.dataset.src;
+        const el = entry.target;
+        const src = el.dataset.src;
         if (src) {
-          img.src = src;
-          img.removeAttribute('data-src');
-          observer.unobserve(img);
+          el.src = src;
+          if (el.tagName === 'VIDEO') el.load();
+          el.removeAttribute('data-src');
+          observer.unobserve(el);
         }
       }
     });
   }, { rootMargin: CONFIG.lazyOffset });
 
-  document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));
+  document.querySelectorAll('[data-src]').forEach(el => observer.observe(el));
 }
 
 /* ═══════════════════════════════
@@ -317,13 +318,42 @@ function openModal(index) {
 function closeModal() {
   DOM.modalOverlay.classList.remove('open');
   document.body.style.overflow = '';
-  DOM.modalGif.src = '';
+  const wrapper = document.querySelector('.modal-gif-wrapper');
+  const media = wrapper.querySelector('.modal-gif');
+  if (media) {
+    if (media.tagName === 'VIDEO') media.pause();
+    media.remove();
+  }
 }
 
 function populateModal(gif) {
   if (!gif) return;
-  DOM.modalGif.src    = gif.video;
-  DOM.modalGif.alt    = gif.title;
+  const wrapper = document.querySelector('.modal-gif-wrapper');
+
+  // Remove previous media
+  const prev = wrapper.querySelector('.modal-gif');
+  if (prev) prev.remove();
+
+  if (isVideo(gif.video)) {
+    const vid = document.createElement('video');
+    vid.className = 'modal-gif modal-video';
+    vid.src = gif.video;
+    vid.autoplay = true;
+    vid.loop = true;
+    vid.muted = false;
+    vid.controls = true;
+    vid.playsInline = true;
+    wrapper.appendChild(vid);
+  } else {
+    const img = document.createElement('img');
+    img.className = 'modal-gif';
+    img.id = 'modalGif';
+    img.src = gif.video;
+    img.alt = gif.title;
+    img.loading = 'lazy';
+    wrapper.appendChild(img);
+  }
+
   DOM.modalTitle.textContent = gif.title;
   DOM.modalAnime.textContent = gif.anime;
 
